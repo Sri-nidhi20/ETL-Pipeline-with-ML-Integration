@@ -362,7 +362,7 @@ elif page == "🗃️ View Clean Data":
     st.markdown("---")
     try:
         #read all clean data from postgresql
-        df = pd.read_sql("SELECT * FROM sales_clean ORDER BY loaded_at DESC", engine)
+        df = pd.read_sql("SELECT * FROM sales_clean", engine)
         if df.empty:
             st.info("No data in database yet. Run the pipeline first.")
         else:
