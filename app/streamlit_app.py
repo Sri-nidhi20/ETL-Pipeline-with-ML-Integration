@@ -1,4 +1,6 @@
 import streamlit as st
+import tempfile
+import os
 import pandas as pd
 import plotly.express as px
 import sys
@@ -242,7 +244,8 @@ if page == "🏠 Home & Upload":
                 final_df = mapped_df[list({**required_columns, **optional_columns}.keys())]
 
                 #save to temp csv
-                temp_path = "data/uploaded_data.csv"
+                temp_dir = tempfile.gettempdir()
+                temp_path = os.path.join(temp_dir, "uploaded_data.csv")
                 final_df.to_csv(temp_path, index = False)
 
                 #Run Pipeline
