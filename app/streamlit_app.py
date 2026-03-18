@@ -12,6 +12,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from etl.main import run_pipeline
 from etl.config import DATABASE_URL
+from etl.profiler import generate_profile 
 
 from ml.segmentation import run_segmentation
 from ml.prediction import run_prediction
@@ -64,7 +65,8 @@ page = st.sidebar.radio(
      "📊 Data Quality Report",
      "🗃️ View Clean Data",
      "📋 ETL Run Logs",
-     "🤖 ML Models"]
+     "🤖 ML Models",
+     "🧠 Ask DALE"]
 )
 
 st.sidebar.markdown("---")
@@ -128,6 +130,95 @@ if page == "🏠 Home & Upload":
         st.dataframe(user_df.head(5), use_container_width = True)
 
         st.markdown("---")
+
+        #auto data profiling
+        st.markdown("### 🔍 Instant Data Profile")
+
+        with st.spinner("🔍 Analyzing your data quality ..."):
+            profile = generate_profile(user_df)
+        
+        col1, col2, col3, col4 = st.columns(4)
+
+        with col1:
+            st.metric(
+                "🏆 Quality Score",
+                f"{profile['quality_score']} / 100"
+            )
+        with col2:
+            st.metric(
+                "📊 Grade",
+                profile["quality_grade"]
+            )
+        with col3:
+            st.metric(
+                "❓ Duplicate Rows",
+                profile["duplicate_rows"]
+            )
+        with col4:
+            missing_total = profile["missing_values"]["Missing Count"].sum()
+            st.metric(
+                "⚠️ Missing Values",
+                int(missing_total)
+            )
+        
+        with st.expander("📋 View Detailed Data Profile"):
+            st.markdown("#### ❓ Missing Values by Column")
+            st.dataframe(
+                profile["missing_values"],
+                use_container_width = True
+            )
+
+            if len(profile["numeric_cols"]) > 0:
+                st.markdown("##### 🔢 Numeric Column Statistics")
+                st.dataframe(
+                    profile["numeric_stats"].round(2),
+                    use_container_width = True
+                )
+            
+            if len(profile["numeric_cols"]) > 0:
+                st.markdown("##### 📈 Value Distributions")
+                cols_per_row = 3
+                numeric_cols = profile["numeroc_cols"]
+
+                for i in range(0, len(numeric_cols), cols_per_row):
+                    cols = st.columns(cols_per_row)
+                    for j, col_name in enumerate(
+                        numeric_cols[i:i+cols_per_row]
+                    ):
+                        with cols[j]:
+                            fig_hist = px.histogram(
+                                user_df,
+                                x = col_name,
+                                title = f"{col_name}",
+                                color_discrete_sequence = ["#4CAF50"]
+                            )
+                            fig_hist.update_layout(
+                                height = 250,
+                                showlegend = False,
+                                margin = dict(t = 30, b=0, l=0, r=0)
+                            )
+                            st.plotly_chart(
+                                fig_hist,
+                                use_container_width = True
+                            )
+
+            if len(profile["numeric_cols"]) > 1:
+                st.markdown("##### 🔥 Correlation Heatmap")
+                corr_matrix = user_df[
+                    profile["numeric_cols"]
+                ].corr().round(2)
+
+                fig_corr = px.imshow(
+                    corr_matrix,
+                    color_continuous_scale = "RdBu",
+                    aspect = "auto"
+                )
+                st.plotly_chart(fig_corr, use_container_width = True)
+
+        #store profile in session state for other pages
+        st.session_state["profile"] = profile
+        st.session_state["user_df"] = user_df
+
 
         #--COLUMN MAPPING
         user_columns = user_df.columns.tolist()
