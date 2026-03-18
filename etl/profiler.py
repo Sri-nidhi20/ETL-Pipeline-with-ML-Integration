@@ -36,10 +36,12 @@ def generate_profile(df):
     })
 
     #duplicates
-    profile["duplicate_rows"] = df.duplicated().sum()
+    dup_mask = df.duplicated()
+    dup_count = int(dup_mask.sum())
+    profile["duplicate_rows"] = dup_count
     profile["duplicate_percent"] = round(
-        df.duplicated().sum() / len(df) * 100, 2
-    )
+        dup_count / len(df) * 100, 2
+    ) if len(df) > 0 else 0.0
 
     # data types
     profile["dtypes"] = pd.DataFrame({
@@ -92,7 +94,7 @@ def generate_profile(df):
     missing_score = max(0, 40 - (total_missing / profile["total_cells"] * 100))
 
     #duplicate score
-    duplicate_score = max(0, 30 - profile["duplicate_percent"])
+    duplicate_score = max(0, 30 - float(profile["duplicate_percent"]))
 
     #completeness score
     complete_cols = sum(1 for x in missing.values if x == 0)
