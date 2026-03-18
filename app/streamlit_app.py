@@ -178,7 +178,7 @@ if page == "🏠 Home & Upload":
             if len(profile["numeric_cols"]) > 0:
                 st.markdown("##### 📈 Value Distributions")
                 cols_per_row = 3
-                numeric_cols = profile["numeroc_cols"]
+                numeric_cols = profile["numeric_cols"]
 
                 for i in range(0, len(numeric_cols), cols_per_row):
                     cols = st.columns(cols_per_row)
