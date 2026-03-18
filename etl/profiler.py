@@ -83,7 +83,7 @@ def generate_profile(df):
         profile["text_stats"] = pd.DataFrame(text_stats)
         profile["text_cols"] = text_cols
     else:
-        profile["text_stats"] = pd.dataFrame()
+        profile["text_stats"] = pd.DataFrame()
         profile["text_cols"] = []
 
     #Data Quality Score
@@ -103,7 +103,7 @@ def generate_profile(df):
     )
 
     #quality grade
-    score = profile["quality score"]
+    score = profile["quality_score"]
     if score >= 90:
         profile["quality_grade"] = "A - Excellent 🟢"
     elif score >= 75:
