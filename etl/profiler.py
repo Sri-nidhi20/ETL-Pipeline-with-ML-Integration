@@ -36,7 +36,7 @@ def generate_profile(df):
     })
 
     #duplicates
-    profile["duplicate_rows"] = df.duplicates().sum()
+    profile["duplicate_rows"] = df.duplicated().sum()
     profile["duplicate_percent"] = round(
         df.duplicated().sum() / len(df) * 100, 2
     )
