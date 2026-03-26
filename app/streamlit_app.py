@@ -793,9 +793,11 @@ elif page == "🧠 Ask DALE":
     st.title("🧠 Ask DALE (AI Assistant)")
     st.markdown("Ask questions in natural language")
 
+
     from ai.nl_to_sql import generate_sql, run_query
 
     user_input = st.text_input("Ask your data...")
+    st.markdown("💡 Try: top customers, total sales, category-wise sales")
 
     if st.button("Run Query"):
         if user_input.strip() == "":

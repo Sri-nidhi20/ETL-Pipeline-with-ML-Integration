@@ -7,28 +7,42 @@ from etl.config import DATABASE_URL
 client = genai.Client(api_key = st.secrets["GEMINI_API_KEY"])
 
 def generate_sql(user_query):
-    prompt = f"""
-    You are an SQL Expert.
-     
-    Convert the following natural language query into a PostgreSQL SQL query.
-       
-    Table: sales_clean
-    Columns: order_id, customer_id, order_date, product_id, product_name, category, quantity, unit_price, total_amount, region, payment_method, status, loaded_at
-    
-    Rules:
-    - Only use SELECT queries
-    - Do Not modify database
-    - Return ONLy SQL query (no explanation)
-    
-    Query: {user_query}
-    """
+    query = user_query.lower()
 
-    response = client.models.generate_content(
-        model = "gemini-pro",
-        contents = prompt
-    )
-
-    return response.text.strip()
+    if "top customers" in query:
+        return """
+        SELECT customer_id, SUM(total_amount) AS total_spent
+        FROM sales_clean
+        GROUP BY customer_id
+        ORDER BY total_spent DESC
+        LIMIT 5;
+        """
+    elif "total sales" in query:
+        return """
+        SELECT SUM(total_amount) AS total_sales
+        FROM sales_clean;
+        """
+    elif "category" in query:
+        return """
+        SELECT category, SUM(total_amount) AS total_sales
+        FROM sales_clean
+        GROUP BY category;
+        """
+    elif "region" in query:
+        return """
+        SELECT region, SUM(total_amount) AS total_sales
+        FROM sales_clean
+        GROUP BY region;
+        """
+    elif "recent orders" in query:
+        return """
+        SELECT * 
+        FROM sales_clean
+        ORDER BY order_date DESC
+        LIMIT 10;
+        """
+    else:
+        return "SELECT * FROM sales_clean LIMIT 10;"
 
 def run_query(sql):
     engine = create_engine(DATABASE_URL)
