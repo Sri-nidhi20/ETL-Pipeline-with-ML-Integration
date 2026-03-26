@@ -4,5 +4,4 @@ sqlalchemy
 psycopg2-binary
 scikit-learn
 plotly
-google-genai
 dotenv

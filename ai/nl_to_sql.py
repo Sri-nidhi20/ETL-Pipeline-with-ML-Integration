@@ -1,10 +1,8 @@
 import streamlit as st
-from google import genai
 from sqlalchemy import create_engine
 import pandas as pd
 from etl.config import DATABASE_URL
 
-client = genai.Client(api_key = st.secrets["GEMINI_API_KEY"])
 
 def generate_sql(user_query):
     query = user_query.lower()
