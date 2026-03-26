@@ -23,7 +23,7 @@ def generate_sql(user_query):
     Query: {user_query}
     """
 
-    model = genai.GenerativeModel("models/gemini-1.5-flash")
+    model = genai.GenerativeModel("models/gemini-pro")
     response = model.generate_content(prompt)
 
     return response.text.strip()
