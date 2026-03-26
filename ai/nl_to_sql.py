@@ -1,10 +1,10 @@
 import streamlit as st
-import google.generativeai as genai
+from google import genai
 from sqlalchemy import create_engine
 import pandas as pd
 from etl.config import DATABASE_URL
 
-genai.configure(api_key = st.secrets["GEMINI_API_KEY"])
+client = genai.Client(api_key = st.secrets["GEMINI_API_KEY"])
 
 def generate_sql(user_query):
     prompt = f"""
@@ -23,8 +23,10 @@ def generate_sql(user_query):
     Query: {user_query}
     """
 
-    model = genai.GenerativeModel("models/gemini-pro")
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(
+        model = "gemini-1.5-flash",
+        contents = prompt
+    )
 
     return response.text.strip()
 
