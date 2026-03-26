@@ -24,7 +24,7 @@ def generate_sql(user_query):
     """
 
     response = client.models.generate_content(
-        model = "gemini-1.5-flash",
+        model = "gemini-pro",
         contents = prompt
     )
 
