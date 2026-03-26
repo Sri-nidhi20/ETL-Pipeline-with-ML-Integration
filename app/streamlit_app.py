@@ -380,7 +380,7 @@ elif page == "📊 Data Quality Report":
         summary = st.session_state["summary"]
         report = summary["report"]
         
-        st.success("Shwoing results from the last pipeline run.")
+        st.success("Showing results from the last pipeline run.")
 
         total_rows = int(report.get("total_rows_input", 0))
         rows_passed = int(report.get("rows_passed", 0))
@@ -788,3 +788,29 @@ elif page == "🤖 ML Models":
 
             except Exception as e:
                 st.error(f"Anomaly Detection Failed: {e}")
+
+elif page == "🧠 Ask DALE":
+    st.title("🧠 Ask DALE (AI Assistant)")
+    st.markdown("Ask questions in natural language")
+
+    from ai.nl_to_sql import generate_sql, run_query
+
+    user_input = st.text_input("Ask your data...")
+
+    if st.button("Run Query"):
+        if user_input.strip() == "":
+            st.warning("Please enter a query")
+        else:
+            sql = generate_sql(user_input)
+
+            st.markdown("### 📃 Generated SQL")
+            st.code(sql, language='sql')
+
+            try:
+                result = run_query(sql)
+
+                st.markdown("### 📊 Result")
+                st.dataframe(result)
+            
+            except Exception as e:
+                st.error(f"Error: {e}")
