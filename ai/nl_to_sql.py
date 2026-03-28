@@ -40,7 +40,7 @@ def generate_sql(user_query):
         LIMIT 10;
         """
     else:
-        return "SELECT * FROM sales_clean LIMIT 10;"
+        return None
 
 def run_query(sql):
     engine = create_engine(DATABASE_URL)

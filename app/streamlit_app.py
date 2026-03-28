@@ -790,29 +790,60 @@ elif page == "🤖 ML Models":
                 st.error(f"Anomaly Detection Failed: {e}")
 
 elif page == "🧠 Ask DALE":
-    st.title("🧠 Ask DALE (AI Assistant)")
-    st.markdown("Ask questions in natural language")
 
-
+    import plotly.express as px
     from ai.nl_to_sql import generate_sql, run_query
 
-    user_input = st.text_input("Ask your data...")
-    st.markdown("💡 Try: top customers, total sales, category-wise sales")
+    st.title("🧠 Ask DALE - Data Assistant & Logic Engine")
+    
+    st.markdown("💡 You can: ")
+    st.markdown("""
+    - Ask in natural language (e.g., *top customers*)
+    - OR write SQL query directly 
+    """)
+
+    user_input = st.text_area("Enter your query: ")
 
     if st.button("Run Query"):
         if user_input.strip() == "":
             st.warning("Please enter a query")
         else:
-            sql = generate_sql(user_input)
+            query = user_input.strip()
 
-            st.markdown("### 📃 Generated SQL")
-            st.code(sql, language='sql')
-
-            try:
-                result = run_query(sql)
-
-                st.markdown("### 📊 Result")
-                st.dataframe(result)
+            if query.lower().startswith("select"):
+                st.info("📃 Running custom SQL query...")
+                sql = query
+            else:
+                st.info("🤖 Converting natural language to SQL...")
+                sql = generate_sql(query)
             
-            except Exception as e:
-                st.error(f"Error: {e}")
+            if sql is None:
+                st.warning("Sorry!! I didn't understand that query.")
+            else:
+                st.markdown("### 📃 Generated SQL")
+                st.code(sql, language = 'sql')
+
+                if not sql.lower().startswith("select"):
+                    st.error("❌ Only SELECT queries allowed")
+                else:
+                    try:
+                        result = run_query(sql)
+
+                        st.markdown("### 📊 Result")
+                        st.dataframe(result)
+
+                        if not result.empty:
+                            numeric_cols = result.select_dtypes(include = ['int64', 'float64']).columns
+                            categorical_cols = result.select_dtypes(include = ['object']).columns
+
+                            if len(numeric_cols) > 0 and len(categorical_cols) > 0:
+                                st.markdown("### 📃 Auto Visualization")
+                                fig = px.bar(result, x = categorical_cols[0], y = numeric_cols[0]),
+                                st.plotly_chart(fig)
+                            elif len(numeric_cols) > 1:
+                                st.markdown("### 📈 Trend Visualization")
+                                fig = px.line(result)
+                                st.plotly_chart(fig)
+                    
+                    except Exception as e:
+                        st.error(f"Error: {e}")
