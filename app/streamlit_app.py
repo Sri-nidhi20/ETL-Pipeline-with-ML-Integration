@@ -833,17 +833,29 @@ elif page == "🧠 Ask DALE":
                         st.dataframe(result)
 
                         if not result.empty:
-                            numeric_cols = result.select_dtypes(include = ['int64', 'float64']).columns
-                            categorical_cols = result.select_dtypes(include = ['object']).columns
+                            numeric_cols = result.select_dtypes(include = ['int64', 'float64']).columns.tolist()
+                            categorical_cols = result.select_dtypes(include = ['object']).columns.tolist()
 
                             if len(numeric_cols) > 0 and len(categorical_cols) > 0:
                                 st.markdown("### 📃 Auto Visualization")
-                                fig = px.bar(result, x = categorical_cols[0], y = numeric_cols[0]),
-                                st.plotly_chart(fig)
+                                x_col = categorical_cols[0]
+                                y_col = numeric_cols[0]
+                                try:
+                                    fig = px.bar(result, x = x_col, y = y_col, title = "Auto Chart")
+                                    st.plotly_chart(fig, use_container_width = True)
+                                except Exception as e:
+                                    st.warning("Could not generate chart for this data")
                             elif len(numeric_cols) > 1:
-                                st.markdown("### 📈 Trend Visualization")
-                                fig = px.line(result)
-                                st.plotly_chart(fig)
+                                st.markdown("### 📈 Numeric Trend")
+
+                                try:
+                                    fig = px.line(result, y = numeric_cols)
+                                    st.plotly_chart(fig, use_container_width = True)
+                                except:
+                                    st.warning("Could not generate line chart")
+                            
+                            else:
+                                st.info(" NOT ENOUGH SUITABLE COLUMNS FOR VISUALIZATION")
                     
                     except Exception as e:
                         st.error(f"Error: {e}")
